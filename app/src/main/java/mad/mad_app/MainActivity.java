@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -11,18 +12,28 @@ import android.widget.Toast;
 import java.io.BufferedInputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
+    private ArrayList<SpeedTest> entries = null;
+    private ArrayAdapter<SpeedTest> adapter = null;
+
     private ListView listView = null;
     private ImageButton addButton = null;
+
+    private BackgroundAsync asyncTask = new BackgroundAsync();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        entries = new ArrayList<SpeedTest>();
+        adapter = new ArrayAdapter<SpeedTest>(this, android.R.layout.simple_list_item_1, entries);
+
         listView = (ListView)findViewById(R.id.listView);
+        listView.setAdapter(adapter);
 
         addButton = (ImageButton)findViewById(R.id.addButton);
         addButton.setOnClickListener(new View.OnClickListener() {
@@ -34,12 +45,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void newSpeedTest() {
-        addButton.setEnabled(false);
+        asyncTask.execute();
     }
 
     private class BackgroundAsync extends AsyncTask<String, Double, Long> {
 
         static final long FILE_SIZE = 5 * 1024; // 5MB
+
+        SpeedTest currentTest = null;
 
         @Override
         protected Long doInBackground(String... params) {
@@ -64,8 +77,16 @@ public class MainActivity extends AppCompatActivity {
                 return finishTime - startTime;
             } catch (Exception e) {
                 Toast.makeText(MainActivity.this, "ERROR DOWNLOADING FILE", Toast.LENGTH_LONG);
-                return -1L;
+                return null;
             }
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            addButton.setEnabled(false);
+            currentTest = new SpeedTest();
         }
 
         @Override
@@ -74,6 +95,11 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Long result) {
+            if(result != null) {
+                currentTest.setSpeedMbps((double)FILE_SIZE/result);
+                adapter.add(currentTest);
+            }
+
             addButton.setEnabled(true);
         }
     }
