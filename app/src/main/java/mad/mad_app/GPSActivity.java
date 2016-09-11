@@ -1,4 +1,4 @@
-package com.example.cameron.working;
+package mad.mad_app;
 
 import android.Manifest;
 import android.content.Intent;

@@ -1,10 +1,12 @@
 package mad.mad_app;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -22,6 +24,8 @@ public class MainActivity extends AppCompatActivity {
     private ListView listView = null;
     private ImageButton addButton = null;
 
+    private Button btnGPS;
+
     private BackgroundAsync asyncTask = new BackgroundAsync();
 
     @Override
@@ -34,6 +38,15 @@ public class MainActivity extends AppCompatActivity {
 
         listView = (ListView)findViewById(R.id.listView);
         listView.setAdapter(adapter);
+
+        btnGPS = (Button) findViewById(R.id.btnGPS);
+        btnGPS.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, GPSActivity.class);
+                startActivity(intent);//-Cameron    ERROR WORKING ON IT
+            }
+        });
 
         addButton = (ImageButton)findViewById(R.id.addButton);
         addButton.setOnClickListener(new View.OnClickListener() {
