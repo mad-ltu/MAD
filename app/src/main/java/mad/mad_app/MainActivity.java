@@ -38,7 +38,16 @@ public class MainActivity extends AppCompatActivity {
 
         listView = (ListView)findViewById(R.id.listView);
         listView.setAdapter(adapter);
-        
+
+        btnGPS = (Button) findViewById(R.id.btnActivityGPS);
+        btnGPS.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, GPSActivity.class);
+                startActivity(intent);
+            }
+        });
+
         addButton = (ImageButton)findViewById(R.id.addButton);
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override

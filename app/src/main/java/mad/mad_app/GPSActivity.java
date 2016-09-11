@@ -21,13 +21,13 @@ public class GPSActivity extends AppCompatActivity {
     }
 
     public void initButtons(){
-        btnStartGPS = (Button) findViewById(R.id.btnGPS);
-        /*btnStartGPS.setOnClickListener(new View.OnClickListener() {
+        btnStartGPS = (Button) findViewById(R.id.btnStartGPS);
+        btnStartGPS.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(GPSActivity.this, MainActivity.class);
                 startActivity(intent);
             }
-        });*/
+        });
     }
 }
