@@ -15,6 +15,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import mad.mad_app.R;
+
 public class GPSActivity extends AppCompatActivity {
 
     private Button btnStartGPS;
