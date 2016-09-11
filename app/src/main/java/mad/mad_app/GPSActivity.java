@@ -11,7 +11,9 @@ import android.widget.TextView;
 public class GPSActivity extends AppCompatActivity {
 
     private TextView txtGPS;
+    private TextView txtCoords;
     private Button btnStartGPS;
+    private Button btnBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,8 +23,20 @@ public class GPSActivity extends AppCompatActivity {
     }
 
     public void initButtons(){
+        txtGPS = (TextView) findViewById(R.id.txtGPS);
+        txtCoords = (TextView) findViewById(R.id.txtCoords);
+
         btnStartGPS = (Button) findViewById(R.id.btnStartGPS);
         btnStartGPS.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //Co-ords code here.
+                txtCoords.append("\n New Co-ords");
+            }
+        });
+
+        btnBack = (Button) findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(GPSActivity.this, MainActivity.class);
