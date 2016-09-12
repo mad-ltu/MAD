@@ -32,9 +32,10 @@
         android:layout_height="wrap_content"
         android:text="Co-Ordinates"
         android:id="@+id/txtCoords"
-        android:layout_centerVertical="true"
+        android:gravity="center"
+        android:layout_below="@+id/btnStartGPS"
         android:layout_centerHorizontal="true"
-        android:gravity="center"/>
+        android:layout_marginTop="40dp" />
 
     <Button
         style="?android:attr/buttonStyleSmall"
