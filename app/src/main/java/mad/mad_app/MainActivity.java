@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
         listView = (ListView)findViewById(R.id.listView);
         listView.setAdapter(adapter);
 
-        btnGPS = (Button) findViewById(R.id.btnActivityGPS);
+        btnGPS = (Button) findViewById(R.id.btnActivityGPS);//Go To GPS Page
         btnGPS.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
