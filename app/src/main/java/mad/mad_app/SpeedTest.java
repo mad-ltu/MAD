@@ -68,6 +68,8 @@ public class SpeedTest {
 
     @Override
     public String toString() {
-        return new SimpleDateFormat("EEE, MMM d, ''yy").format(dateTime) + "\tSpeed: " + speedMbps + "Mb/s\tConnection: " + type.toString();
+        return String.format("%s\tSpeed: %sMB/s\tConncetion: %s",
+                new SimpleDateFormat("EEE, MMM d, ''yy").format(dateTime),
+                speedMbps.toString(), type.toString());
     }
 }
