@@ -7,35 +7,31 @@ import java.util.Date;
  * Created by Tim on 11/09/2016.
  */
 public class SpeedTest {
-
-    public enum ConnectionType {
-        WIFI,
-        _3G,
-        _4G,
-        LTE
-    }
-
     // For when DB is implemented
     //private Long id;
     //private Long parentId;
 
+    private Double lat, lon;
     private Date dateTime;
     private Double speedMbps;
-    private ConnectionType type;
+    private String connType;
+    private String connSubType;
 
 
-    public SpeedTest(Date dateTime, Double speedMbps, ConnectionType type) {
+    public SpeedTest(Date dateTime, Double speedMbps, String connType, Double lat, Double lon) {
+        this.lat = lat;
+        this.lon = lon;
         this.dateTime = dateTime;
         this.speedMbps = speedMbps;
-        this.type = type;
+        this.connType = connType;
     }
 
-    public SpeedTest(Long dateTime, Double speedMbps, ConnectionType type) {
-        this(new Date(dateTime), speedMbps, type);
+    public SpeedTest(Long dateTime, Double speedMbps, String connType, Double lat, Double lon) {
+        this(new Date(dateTime), speedMbps, connType, lat, lon);
     }
 
     public SpeedTest() {
-        this(System.currentTimeMillis(), new Double(0), ConnectionType.WIFI);
+        this(System.currentTimeMillis(), 0.0, "UNKNOWN", 0.0, 0.0);
     }
 
     public Date getDateTime() {
@@ -58,18 +54,29 @@ public class SpeedTest {
         this.speedMbps = speedMbps;
     }
 
-    public ConnectionType getType() {
-        return type;
+    public String getConnType() {
+        return connType;
     }
 
-    public void setType(ConnectionType type) {
-        this.type = type;
+    public void setConnType(String connType) {
+        this.connType = connType;
     }
+
+    public Double getLat() { return lat; }
+    public void setLat(Double lat) { this.lat = lat; }
+
+    public Double getLon() { return lon; }
+    public void setLon(Double lon) { this.lon = lon; }
+
+    public String getConnSubType() { return connSubType; }
+    public void setConnSubType(String connSubType) { this.connSubType = connSubType; }
+
 
     @Override
     public String toString() {
-        return String.format("%s\tSpeed: %sMB/s\tConncetion: %s",
+        return String.format("Location:%s:%s\t%s\tSpeed: %sMB/s\tConncetion: %s %s",
+                lat.toString(), lon.toString(),
                 new SimpleDateFormat("EEE, MMM d, ''yy").format(dateTime),
-                speedMbps.toString(), type.toString());
+                speedMbps.toString(), connType, connSubType);
     }
 }
