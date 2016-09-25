@@ -1,51 +1,35 @@
 package mad.mad_app;
 
 import android.Manifest;
-import android.content.Context;
+import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ListView;
+import android.widget.ExpandableListView;
 import android.widget.Toast;
 
-import java.io.BufferedInputStream;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity implements LocationListener{
-    private final int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 124;
+public class MainActivity extends AppCompatActivity { //implements LocationListener{
+    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 124;
 
-    private ArrayList<String> entries;
-    private ArrayAdapter<String> adapter;
-
-    private ListView listView;
-    private Button btnStartTest;
+    private SpeedTestExpandableListAdapter adapter;
+    private ExpandableListView listView;
 
     private LocationManager locationManager;
+
+    ProgressDialog loadingDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
         if (Build.VERSION.SDK_INT >= 23) {
             // Marshmallow+
@@ -53,29 +37,41 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         } else {
             // Pre-Marshmallow
         }
-        entries = new ArrayList<>();
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, entries);
 
-        listView = (ListView ) findViewById(R.id.listView);
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+        loadingDialog = new ProgressDialog(this);
+        loadingDialog.show(this, "Loading", "Loading records from database", true);
+
+        List<LocationGroup> groups = null;
+        HashMap<LocationGroup, List<SpeedTest>> childMap = new HashMap<>();
+
+        LocationGroupManager lgManager = new LocationGroupManager(this);
+        SpeedTestManager stManager = new SpeedTestManager(this);
+        try {
+            lgManager.open();
+
+            groups = lgManager.getAll();
+            for(LocationGroup group : groups) {
+                List<SpeedTest> tests = stManager.getAllForParent(group.getId());
+                childMap.put(group, tests);
+            }
+
+        } catch(Exception e) {
+            Toast.makeText(this, "Error loading records from database!", Toast.LENGTH_LONG).show();
+        } finally {
+            lgManager.close();
+            stManager.close();
+        }
+
+        adapter = new SpeedTestExpandableListAdapter(groups, childMap);
+        listView = (ExpandableListView)findViewById(R.id.exList);
         listView.setAdapter(adapter);
 
-        btnStartTest = (Button) findViewById(R.id.addButton);
-        btnStartTest.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                btnStartTest.setEnabled(false);
-
-                if(Build.VERSION.SDK_INT >= 23) {
-                    if(checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, MainActivity.this, null);
-                    }
-                } else {
-                    locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, MainActivity.this, null);
-                }
-            }
-        });
+        loadingDialog.dismiss();
     }
 
+    /*
     @Override
     public void onLocationChanged(Location location) {
         if(location != null) {
@@ -160,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
 
                 return finishTime - startTime;
             } catch (Exception e) {
-                Log.e("MAD", e.getMessage());
+                Log.e(TAG, e.getMessage());
                 return null;
             }
 
@@ -169,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         @Override
         protected void onProgressUpdate(Double... progress) {
             // Show progress update
-            Log.d("MAD", progress[0].toString());
+            Log.d(TAG, progress[0].toString());
         }
 
         @Override
@@ -177,13 +173,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
             super.onPostExecute(result);
 
             if(result != null) {
-                current.setSpeedMbps(((double)FILE_SIZE / 1024 / 1024)/((double)result / 1000));
+                current.setSpeedKbps(((double)FILE_SIZE / 1024 / 1024)/((double)result / 1000));
                 adapter.add(current.toString());
             }
             btnStartTest.setEnabled(true);
         }
     }
-
+*/
     // Permissions
     private void checkAndAskPermissions() {
         List<String> permissionsNeeded = new ArrayList<String>();

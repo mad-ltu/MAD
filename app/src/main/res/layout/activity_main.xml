@@ -9,21 +9,59 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="mad.mad_app.MainActivity">
 
-    <Button
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="New Test"
-        android:id="@+id/addButton"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Locations"
+        android:id="@+id/listTitle"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        style="@style/Base.TextAppearance.AppCompat.Title"
+        android:clickable="false"
+        android:singleLine="false" />
+
+    <ExpandableListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/exList"
+        android:layout_below="@+id/listTitle"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/detailView"
+        android:choiceMode="singleChoice" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/buttonsContainer">
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Statistics"
+            android:id="@+id/btnCompare"
+            android:layout_weight="1" />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="New Test"
+            android:id="@+id/btnNew"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/detailView"
+        android:layout_above="@+id/buttonsContainer"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
-    <ListView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/listView"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_above="@+id/addButton"
-        android:clickable="false" />
 </RelativeLayout>
