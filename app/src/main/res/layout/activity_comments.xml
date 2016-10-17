@@ -98,7 +98,7 @@
         android:layout_alignParentStart="true"
         android:id="@+id/listView"
         android:elevation="1dp"
-        android:layout_weight=".5" />
+        android:layout_weight="0.55" />
 
     <LinearLayout
         android:orientation="horizontal"
@@ -123,6 +123,13 @@
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:srcCompat="@android:drawable/stat_sys_data_bluetooth"
+            android:id="@+id/btnBluetooth"
+            android:layout_weight="1" />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             app:srcCompat="?android:attr/actionModePasteDrawable"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
@@ -132,6 +139,7 @@
             android:elevation="0dp"
             android:layout_weight="1"
             android:scaleType="fitEnd" />
+
     </LinearLayout>
 
 </LinearLayout>
