@@ -39,6 +39,19 @@ public class SpeedTestManager {
         handler.close();
     }
 
+    public SpeedTest get(long id) {
+        SpeedTest result = null;
+
+        Cursor cursor = db.query(SpeedTestDBHandler.TBL_NAME, allColumns,
+                SpeedTestDBHandler.COL_ID + " = " + id,
+                null, null, null, null);
+        if(cursor.moveToFirst()) {
+            result = fromCursor(cursor);
+        }
+
+        return result;
+    }
+
     public List<SpeedTest> getAllForParent(Long parentId) {
         if(parentId == null) return null;
 
@@ -61,7 +74,7 @@ public class SpeedTestManager {
         ArrayList<SpeedTest> result = new ArrayList<>();
 
         Cursor cursor = db.query( SpeedTestDBHandler.TBL_NAME, allColumns,
-                                    null, null, null, null, null, null);
+                null, null, null, null, null, null);
         cursor.moveToFirst();
         while(!cursor.isAfterLast()) {
             SpeedTest test = fromCursor(cursor);
@@ -82,7 +95,7 @@ public class SpeedTestManager {
         values.put(SpeedTestDBHandler.COL_PARENT_ID, test.getParentId());
         Date testTime = test.getDateTime();
         values.put(SpeedTestDBHandler.COL_DATETIME, testTime == null ? null : testTime.getTime());
-        values.put(SpeedTestDBHandler.COL_SPEED, test.getSpeedKbps());
+        values.put(SpeedTestDBHandler.COL_SPEED, test.getSpeedKBps());
         values.put(SpeedTestDBHandler.COL_CONN_TYPE, test.getConnType());
         values.put(SpeedTestDBHandler.COL_CONN_SUBTYPE, test.getConnSubType());
 
@@ -100,6 +113,12 @@ public class SpeedTestManager {
         }
     }
 
+    public void clearDB() {
+        Log.w(TAG, "DELETING ALL RECORDS FROM TESTS DB!");
+
+        db.execSQL("delete from " + SpeedTestDBHandler.TBL_NAME);
+    }
+
     private SpeedTest fromCursor(Cursor cursor) {
         if(cursor == null) return null;
 
@@ -107,7 +126,7 @@ public class SpeedTestManager {
         test.setId(cursor.getLong(0));
         test.setParentId(cursor.getLong(1));
         test.setDateTime(cursor.getLong(2));
-        test.setSpeedKbps(cursor.getDouble(3));
+        test.setSpeedKBps(cursor.getDouble(3));
         test.setConnType(cursor.getString(4));
         test.setConnSubType(cursor.getString(5));
 

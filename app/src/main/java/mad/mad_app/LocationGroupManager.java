@@ -8,7 +8,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -36,6 +35,20 @@ public class LocationGroupManager {
 
     public void close() {
         handler.close();
+    }
+
+    public LocationGroup get(long id) {
+        LocationGroup result = null;
+
+        Cursor cursor = db.query(LocationGroupDBHandler.TBL_NAME, allColumns,
+                LocationGroupDBHandler.COL_ID + " = " + id,
+                null, null, null, null);
+        if(cursor.moveToFirst()) {
+            result = fromCursor(cursor);
+        }
+
+        cursor.close();
+        return result;
     }
 
     public List<LocationGroup> getAll() {
@@ -78,6 +91,12 @@ public class LocationGroupManager {
         } else {
             Log.d(TAG, "Trying to delete a null record!");
         }
+    }
+
+    public void clearDB() {
+        Log.w(TAG, "DELETING ALL RECORDS FROM LOCATION DB!");
+
+        db.execSQL("delete from " + LocationGroupDBHandler.TBL_NAME);
     }
 
     private LocationGroup fromCursor(Cursor cursor) {

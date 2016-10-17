@@ -18,7 +18,7 @@ public class LocationGroupDBHandler extends SQLiteOpenHelper {
     public static final String COL_LON = "lon";
 
     private static final String DB_NAME = "locations.db";
-    private static final int DB_VERSION = 0;
+    private static final int DB_VERSION = 1;
 
     private static final String DB_CREATE =
             "create table " + TBL_NAME + "(" +

@@ -1,9 +1,11 @@
 package mad.mad_app;
 
+import java.io.Serializable;
+
 /**
  * Created by Tim on 25/09/2016.
  */
-public class LocationGroup {
+public class LocationGroup implements Serializable{
 
     private Long id;
 
@@ -29,4 +31,15 @@ public class LocationGroup {
 
     public Double getLon() { return lon; }
     public void setLon(Double lon) { this.lon = lon; }
+
+    @Override
+    public String toString() {
+        return String.format("%s - %.2f, %.2f", name, lat, lon);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof LocationGroup &&
+                ((LocationGroup)o).getId().equals(id);
+    }
 }

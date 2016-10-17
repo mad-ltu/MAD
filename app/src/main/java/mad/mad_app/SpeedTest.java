@@ -1,33 +1,36 @@
 package mad.mad_app;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
  * Created by Tim on 11/09/2016.
  */
-public class SpeedTest {
+public class SpeedTest implements Serializable {
     private Long id;
     private Long parentId;
 
+    private Double lat, lon;
     private Date dateTime;
-    private Double speedKbps;
+    private Double speedKBps;
     private String connType;
     private String connSubType;
 
 
-    public SpeedTest(Date dateTime, Double speedMbps, String connType) {
+    public SpeedTest(Date dateTime, Double speedKBps, String connType, String connSubType) {
         this.dateTime = dateTime;
-        this.speedKbps = speedMbps;
+        this.speedKBps = speedKBps;
         this.connType = connType;
+        this.connSubType = connSubType;
     }
 
-    public SpeedTest(Long dateTime, Double speedMbps, String connType, Double lat, Double lon) {
-        this(new Date(dateTime), speedMbps, connType);
+    public SpeedTest(Long dateTime, Double speedKBps, String connType, String connSubType) {
+        this(new Date(dateTime), speedKBps, connType, connSubType);
     }
 
     public SpeedTest() {
-        this(System.currentTimeMillis(), 0.0, "UNKNOWN", 0.0, 0.0);
+        this(System.currentTimeMillis(), 0.0, "UNKNOWN", "UNKNOWN");
     }
 
     public Long getId() { return id; }
@@ -46,11 +49,11 @@ public class SpeedTest {
         setDateTime(new Date(dateTime));
     }
 
-    public Double getSpeedKbps() {
-        return speedKbps;
+    public Double getSpeedKBps() {
+        return speedKBps;
     }
-    public void setSpeedKbps(Double speedKbps) {
-        this.speedKbps = speedKbps;
+    public void setSpeedKBps(Double speedKBps) {
+        this.speedKBps = speedKBps;
     }
 
     public String getConnType() {
@@ -63,10 +66,22 @@ public class SpeedTest {
     public String getConnSubType() { return connSubType; }
     public void setConnSubType(String connSubType) { this.connSubType = connSubType; }
 
+    public Double getLon() { return lon; }
+    public void setLon(Double lon) { this.lon = lon; }
+
+    public Double getLat() { return lat; }
+    public void setLat(Double lat) { this.lat = lat; }
+
     @Override
     public String toString() {
-        return String.format("%s\tSpeed: %sMB/s\tConnection: %s %s",
-                new SimpleDateFormat("EEE, MMM d, ''yy @ HH:mm").format(dateTime),
-                speedKbps.toString(), connType, connSubType);
+        return String.format("%s\tSpeed: %.2fKB/s\nConnection: %s %s",
+                new SimpleDateFormat("EEE, MMM d, ''yy @ hh:mm.ssa").format(dateTime),
+                speedKBps, connType, connSubType);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof SpeedTest &&
+                ((SpeedTest)o).getId().equals(id);
     }
 }

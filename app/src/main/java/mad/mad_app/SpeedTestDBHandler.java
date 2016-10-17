@@ -20,17 +20,17 @@ public class SpeedTestDBHandler extends SQLiteOpenHelper{
     public static final String COL_CONN_SUBTYPE = "conn_subtype";
 
     private static final String DB_NAME = "tests.db";
-    private static final int DB_VERSION = 0;
+    private static final int DB_VERSION = 1;
 
     private static final String DB_CREATE =
             "create table " + TBL_NAME + "(" +
-            COL_ID + " integer primary key autoincrement, " +
-            COL_PARENT_ID + " integer not null, " +
-            COL_DATETIME + " integer not null, " +
-            COL_SPEED + " real not null, " +
-            COL_CONN_TYPE + " text not null, " +
-            COL_CONN_SUBTYPE + " text not null, " +
-            "foreign key{" + COL_PARENT_ID + ") references " + LocationGroupDBHandler.TBL_NAME + "(" + LocationGroupDBHandler.COL_ID + "));";
+                    COL_ID + " integer primary key autoincrement, " +
+                    COL_PARENT_ID + " integer not null, " +
+                    COL_DATETIME + " integer not null, " +
+                    COL_SPEED + " real not null, " +
+                    COL_CONN_TYPE + " text not null, " +
+                    COL_CONN_SUBTYPE + " text not null, " +
+                    "foreign key(" + COL_PARENT_ID + ") references " + LocationGroupDBHandler.TBL_NAME + "(" + LocationGroupDBHandler.COL_ID + "));";
 
 
     public SpeedTestDBHandler(Context context) {
