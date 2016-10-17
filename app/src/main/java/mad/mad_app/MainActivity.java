@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.SQLException;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -19,6 +18,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -26,6 +26,12 @@ import android.widget.CheckBox;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationListener;
 
 import java.io.BufferedInputStream;
 import java.io.Serializable;
@@ -37,7 +43,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int PERMISSIONS_REQUEST_CALLBACK_ID = 4040;
 
@@ -48,49 +54,126 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView tvItemDetail;
 
-    private LocationManager locationManager;
+    private GoogleApiClient googleApiClient;
+    private LocationRequest locationRequest;
+    private Location lastKnownLocation;
 
     private ProgressDialog progressDialog;
 
     @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        // on connect to GoogleApiClient
+        requestLocationUpdatesIfAllowed();
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        this.lastKnownLocation = location;
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    protected void onStart() {
+        googleApiClient.connect();
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        googleApiClient.disconnect();
+        super.onStop();
+    }
+
+    protected synchronized GoogleApiClient buildGoogleApiClient() {
+        return new GoogleApiClient.Builder(this).addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API).build();
+    }
+
+    protected void createLocationRequest() {
+        locationRequest = new LocationRequest();
+        locationRequest.setInterval(5000); // 5s interval
+        locationRequest.setFastestInterval(5000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+
+    protected void stopLocationUpdates() {
+        LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
+    }
+
+    @TargetApi(23)
+    private boolean requestLocationUpdatesIfAllowed() {
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED ) {
+            lastKnownLocation = LocationServices.FusedLocationApi.getLastLocation(
+                    googleApiClient);
+            LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient,
+                    locationRequest, this);
+            return true;
+        }
+        return false;
+    }
+
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        if (Build.VERSION.SDK_INT >= 23) {
+            setContentView(R.layout.activity_main);
 
-        if(Build.VERSION.SDK_INT >= 23) {
             // Marshmallow+ check for permissions
             checkAndAskPermissions();
+
+            tvItemDetail = (TextView) findViewById(R.id.tvDetails);
+
+            googleApiClient = buildGoogleApiClient();
+            createLocationRequest();
+
+            initList();
+
+            adapter = new SpeedTestExpandableListAdapter(groups, childMap);
+            listView = (ExpandableListView) findViewById(R.id.exListView);
+            listView.setAdapter(adapter);
+
+            listView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+                @Override
+                public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
+                    tvItemDetail.setText(((LocationGroupListItem) adapter.getGroup(groupPosition)).data.toString());
+                    return false;
+                }
+            });
+
+            listView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+                @Override
+                public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                    tvItemDetail.setText(((SpeedTestListItem) adapter.getChild(groupPosition, childPosition)).data.toString());
+                    return false;
+                }
+            });
         }
+    }
 
-        tvItemDetail = (TextView) findViewById(R.id.tvDetails);
-
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-
-        initList();
-
-        adapter = new SpeedTestExpandableListAdapter(groups, childMap);
-        listView = (ExpandableListView)findViewById(R.id.exListView);
-        listView.setAdapter(adapter);
-
-        listView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
-            @Override
-            public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
-                tvItemDetail.setText(((LocationGroupListItem)adapter.getGroup(groupPosition)).data.toString());
-                return false;
-            }
-        });
-
-        listView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-            @Override
-            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-                tvItemDetail.setText(((SpeedTestListItem)adapter.getChild(groupPosition, childPosition)).data.toString());
-                return false;
-            }
-        });
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopLocationUpdates();
     }
 
     @Override
     protected void onResume() {
+        if (googleApiClient.isConnected()) {
+            requestLocationUpdatesIfAllowed();
+        }
+
         List<LocationGroupListItem> groupsCopy = new ArrayList<>(groups);
         Map<LocationGroupListItem, List<SpeedTestListItem>> childMapCopy = new HashMap<>(childMap);
 
@@ -99,24 +182,24 @@ public class MainActivity extends AppCompatActivity {
 
         initList();
 
-        for(LocationGroupListItem groupCopy : groupsCopy) {
+        for (LocationGroupListItem groupCopy : groupsCopy) {
             int groupIndex = groups.indexOf(groupCopy);
-            if(groupIndex != -1) {
+            if (groupIndex != -1) {
                 groups.get(groupIndex).cbSelector.setChecked(groupCopy.cbSelector.isChecked());
 
-                for(SpeedTestListItem childCopy : childMapCopy.get(groupCopy)) {
+                for (SpeedTestListItem childCopy : childMapCopy.get(groupCopy)) {
                     List<SpeedTestListItem> newChildList = null;
-                    for(LocationGroupListItem groupKey : childMap.keySet()) {
+                    for (LocationGroupListItem groupKey : childMap.keySet()) {
                         // Need to search manually because our hashcodes won't be the same.
-                        if(groupKey.equals(groupCopy)) {
+                        if (groupKey.equals(groupCopy)) {
                             newChildList = childMap.get(groupKey);
                             break;
                         }
                     }
 
-                    if(newChildList != null) {
+                    if (newChildList != null) {
                         int childIndex = newChildList.indexOf(childCopy);
-                        if(childIndex != -1) {
+                        if (childIndex != -1) {
                             newChildList.get(childIndex).cbSelector.setChecked(childCopy.cbSelector.isChecked());
                         }
                     }
@@ -289,12 +372,11 @@ public class MainActivity extends AppCompatActivity {
         startActivity(statsIntent);
     }
 
-    private class SpeedTestTask extends AsyncTask<Integer, Double, Long> implements LocationListener {
+    private class SpeedTestTask extends AsyncTask<Integer, Double, Long> {
 
         public final int DL_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
         private SpeedTest current;
-        private boolean locationReceived = false;
 
         @Override
         protected void onPreExecute() {
@@ -316,10 +398,6 @@ public class MainActivity extends AppCompatActivity {
             }
             current.setConnType(netType);
             current.setConnSubType(netSubType);
-
-            if(checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1, 1, this);
-            }
 
             progressDialog = new ProgressDialog(MainActivity.this, ProgressDialog.STYLE_HORIZONTAL);
             progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
@@ -366,6 +444,9 @@ public class MainActivity extends AppCompatActivity {
                         publishProgress(((double)totalDownloaded/(double) DL_FILE_SIZE) * 100.0);
                     }
 
+                    long finishTime = System.currentTimeMillis();
+
+
                     if(isCancelled()) {
                         return null;
                     } else {
@@ -376,30 +457,26 @@ public class MainActivity extends AppCompatActivity {
                             }
                         });
 
-                        int timeOutCounter = 0;
-                        while(!isCancelled() && locationReceived == false) {
-                            Log.d(TAG, "Waiting for location");
-                            Thread.sleep(1000); // wait for a second and check again
-                            if(timeOutCounter++ > 5) { // If we have waited longer than 5 seconds, just use lastKnownLocation
-                                try {
-                                    locationManager.removeUpdates(this);
-                                } catch(SecurityException e) {
-                                    Log.e(TAG, "User removed location access somewhere between starting and finishing a test");
-                                }
-
-                                Location loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                                if(loc != null) {
-                                    current.setLat(loc.getLatitude());
-                                    current.setLon(loc.getLongitude());
-
-                                    locationReceived = true;
-                                }
+                        int timeout = 0;
+                        while(!isCancelled() && timeout < 5) {
+                            if(lastKnownLocation.getTime() > 10000 || lastKnownLocation.getAccuracy() > 50) {
+                                // reject location for being too old or inaccurate
+                                timeout++;
+                                Thread.sleep(1000); // sleep one sec and try again
+                            } else {
+                                current.setLat(lastKnownLocation.getLatitude());
+                                current.setLon(lastKnownLocation.getLongitude());
                             }
                         }
 
-                        long finishTime = System.currentTimeMillis();
-                        return finishTime - startTime;
+                        // We timed out, just use the last known location
+                        if(current.getLat() ==  null) {
+                            current.setLat(lastKnownLocation.getLatitude());
+                            current.setLon(lastKnownLocation.getLongitude());
+                        }
                     }
+
+                    return finishTime - startTime;
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage());
                     return null;
@@ -432,46 +509,6 @@ public class MainActivity extends AppCompatActivity {
 
             super.onPostExecute(timeTaken);
         }
-
-        @Override
-        public void onLocationChanged(Location location) {
-            if(isCancelled()) {
-                try {
-                    locationManager.removeUpdates(this);
-                } catch(SecurityException e) {
-                    Log.e(TAG, "User removed location access somewhere between starting and finishing a test");
-                }
-            } else {
-                if(location != null
-                        && location.hasAccuracy()
-                        && location.getAccuracy() < 5.0f // Closer than 5m of accuracy
-                        && (System.currentTimeMillis() - location.getTime()) < 5 * 1000) { //location result less than 5s old
-                    if(current != null) {
-                        current.setLat(location.getLatitude());
-                        current.setLon(location.getLongitude());
-
-                        locationReceived = true;
-                        Log.d(TAG, "Received good location.");
-                    }
-
-                    try {
-                        locationManager.removeUpdates(this);
-                    } catch(SecurityException e) {
-                        Log.e(TAG, "User removed location access somewhere between starting and finishing a test");
-                    }
-                } else if(location != null) {
-                    Log.d(TAG, "Rejecting location");
-                }
-            }
-
-        }
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) { }
-        @Override
-        public void onProviderEnabled(String provider) { }
-        @Override
-        public void onProviderDisabled(String provider) { }
     }
 
     // -------- PERMISSIONS ---------------

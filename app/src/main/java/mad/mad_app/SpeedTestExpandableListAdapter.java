@@ -153,7 +153,7 @@ public class SpeedTestExpandableListAdapter extends BaseExpandableListAdapter {
                 commentsIntent.putExtra("PARENT_TYPE_CODE", "SPEED_TEST");
                 commentsIntent.putExtra("INFO", new SimpleDateFormat("dd/mm/yyyy hh:mm.ssa").format(test.data.getDateTime()));
                 commentsIntent.putExtra("EXTRA_INFO_LEFT", test.data.getConnType() + " - " + test.data.getConnSubType());
-                commentsIntent.putExtra("EXTRA_INFO_RIGHT", test.data.getSpeedKBps());
+                commentsIntent.putExtra("EXTRA_INFO_RIGHT", String.format("%.2fKB/s", test.data.getSpeedKBps()));
 
                 childParentInner.getContext().startActivity(commentsIntent);
             }
