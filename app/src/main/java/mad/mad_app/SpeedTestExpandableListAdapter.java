@@ -101,7 +101,8 @@ public class SpeedTestExpandableListAdapter extends BaseExpandableListAdapter {
                 commentsIntent.putExtra("ID", locationGroup.data.getId());
                 commentsIntent.putExtra("PARENT_TYPE_CODE", "LOCATION_GROUP");
                 commentsIntent.putExtra("INFO", locationGroup.data.getName());
-                commentsIntent.putExtra("EXTRA_INFO_LEFT", locationGroup.data.getLat() + ", " + locationGroup.data.getLon());
+                commentsIntent.putExtra("EXTRA_INFO_LEFT",
+                        String.format("%.2f, %.2f", locationGroup.data.getLat(), locationGroup.data.getLon()));
                 commentsIntent.putExtra("EXTRA_INFO_RIGHT", "");
 
                 childParentInner.getContext().startActivity(commentsIntent);

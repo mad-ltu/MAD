@@ -1,38 +1,43 @@
 package mad.mad_app;
 
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.database.SQLException;
+import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.support.v7.widget.PopupMenu;
+import android.text.InputType;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CommentsActivity extends AppCompatActivity {
+public class CommentsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     public static final String TAG = CommentsActivity.class.getSimpleName();
 
     private TextView info;
     private TextView extraInfoLeft;
     private TextView extraInfoRight;
-    private MapView mapView;
+    private GoogleMap mapView;
 
     private ImageView image;
     private ImageButton newComment;
     private ImageButton deleteItem;
+    private ImageButton editName;
 
     private ListView commentsList;
     private CommentListAdapter adapter;
@@ -110,6 +115,79 @@ public class CommentsActivity extends AppCompatActivity {
                 dialog.show();
             }
         });
+
+        editName = (ImageButton)findViewById(R.id.btnEditName);
+        if(parentTypeCode.equals("LOCATION_GROUP")) {
+            // Onyl location groups can change their name
+            editName.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final EditText input = new EditText(CommentsActivity.this);
+                    input.setInputType(InputType.TYPE_CLASS_TEXT);
+
+                    AlertDialog.Builder alertBuilder = new AlertDialog.Builder(CommentsActivity.this);
+                    alertBuilder.setTitle("Edit location name")
+                            .setView(input)
+                            .setPositiveButton("Submit", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // Confirmed, save new name
+                                    if(input.getText().toString().trim().length() != 0) {
+                                        saveName(input.getText().toString().trim());
+                                        info.setText(input.getText().toString().trim());
+                                    } else {
+                                        Toast.makeText(CommentsActivity.this,
+                                                "Can't save location with no name!", Toast.LENGTH_LONG).show();
+                                    }
+                                }
+                            })
+                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // cancel, do nothing
+                                }
+                            });
+                    AlertDialog dialog = alertBuilder.create();
+                    dialog.show();
+                }
+            });
+        } else {
+            // Don't show the edit button if they can't edit
+            editName.setVisibility(View.GONE);
+        }
+
+
+
+        SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map_fragment);
+        mapFragment.getMapAsync(this);
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        this.mapView = googleMap;
+
+        LocationGroupManager lgm = new LocationGroupManager(this);
+        try {
+            lgm.open();
+
+            LocationGroup group = null;
+            if(parentId != -1) {
+                // this is a speed test, use parentId to get location details
+                group = lgm.get(parentId);
+            } else {
+                group = lgm.get(id);
+            }
+
+            // Add our location marker
+            LatLng location = new LatLng(group.getLat(), group.getLon());
+            mapView.addMarker(new MarkerOptions().position(location).title(group.getName()));
+            mapView.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 16));
+
+        } catch (SQLException e) {
+            Toast.makeText(this, "Error loading record from database.", Toast.LENGTH_LONG).show();
+        } finally {
+            lgm.close();
+        }
     }
 
     @Override
@@ -185,6 +263,25 @@ public class CommentsActivity extends AppCompatActivity {
                 stm.close();
                 cm.close();
             }
+        }
+    }
+
+    private void saveName(String newName) {
+        if(!parentTypeCode.equals("LOCATION_GROUP")) return; // only location groups can have their names changed
+
+        LocationGroupManager lgm = new LocationGroupManager(this);
+        try {
+            lgm.open();
+
+            LocationGroup lg = lgm.get(id);
+            if(lg != null) {
+                lg.setName(newName);
+                lgm.update(lg);
+            }
+        } catch(SQLException e) {
+            Toast.makeText(this, "Error saving record to database.", Toast.LENGTH_LONG).show();
+        } finally {
+            lgm.close();
         }
     }
 }

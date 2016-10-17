@@ -47,7 +47,10 @@
                     android:background="@android:drawable/ic_menu_gallery"
                     android:layout_alignParentRight="true"
                     android:layout_alignParentEnd="true"
-                    android:focusable="false" />
+                    android:focusable="false"
+                    android:maxHeight="300dp"
+                    android:scaleType="fitCenter"
+                    android:adjustViewBounds="true" />
 
                 <EditText
                     android:layout_width="match_parent"

@@ -308,7 +308,7 @@ public class MainActivity extends AppCompatActivity {
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1, 1, this);
             }
 
-            progressDialog = new ProgressDialog(MainActivity.this, ProgressDialog.STYLE_SPINNER);
+            progressDialog = new ProgressDialog(MainActivity.this, ProgressDialog.STYLE_HORIZONTAL);
             progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
             progressDialog.setTitle("Performing Test");
             progressDialog.setMessage("Performing initial setup...");
@@ -331,13 +331,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Long doInBackground(Integer[] params) {
             if(checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                // DEBUG
-                if("".equals("")) {
-                    current.setLat(0d);
-                    current.setLon(0d);
-                    return 100L;
-                }
-
                 // Do test
                 try {
                     MainActivity.this.runOnUiThread(new Runnable() {

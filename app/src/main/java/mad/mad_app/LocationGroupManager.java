@@ -85,6 +85,20 @@ public class LocationGroupManager {
         return result;
     }
 
+    public void update(LocationGroup locationGroup) {
+        if(locationGroup != null && locationGroup.getId() != null) {
+            ContentValues values = new ContentValues();
+            values.put(LocationGroupDBHandler.COL_NAME, locationGroup.getName());
+            values.put(LocationGroupDBHandler.COL_LAT, locationGroup.getLat());
+            values.put(LocationGroupDBHandler.COL_LON, locationGroup.getLon());
+
+            db.update(LocationGroupDBHandler.TBL_NAME, values,
+                    LocationGroupDBHandler.COL_ID + " = " + locationGroup.getId(), null);
+        } else {
+            Log.d(TAG, "Trying to update a null record!");
+        }
+    }
+
     public void delete(LocationGroup locationGroup) {
         if(locationGroup != null && locationGroup.getId() != null) {
             db.delete(LocationGroupDBHandler.TBL_NAME, LocationGroupDBHandler.COL_ID + " = " + locationGroup.getId(), null);

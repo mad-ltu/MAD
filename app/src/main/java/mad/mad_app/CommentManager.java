@@ -76,7 +76,7 @@ public class CommentManager {
         ArrayList<Comment> result = new ArrayList<>();
 
         Cursor cursor = db.query(CommentDBHandler.TBL_NAME, allColumns,
-                CommentDBHandler.COL_PARENT_TYPE_CODE + " = " + typeCode, null, null, null, null);
+                CommentDBHandler.COL_PARENT_TYPE_CODE + " = " + "\"" + typeCode + "\"", null, null, null, null);
         cursor.moveToFirst();
 
         while(!cursor.isAfterLast()) {
@@ -143,7 +143,7 @@ public class CommentManager {
 
             String where = CommentDBHandler.COL_ID + " = " + comment.getId() +
                     " AND " + CommentDBHandler.COL_PARENT_ID + " = " + comment.getParentId() +
-                    " AND " + CommentDBHandler.COL_PARENT_TYPE_CODE + " = " + comment.getParentTypeCode();
+                    " AND " + CommentDBHandler.COL_PARENT_TYPE_CODE + " = " +  "\"" + comment.getParentTypeCode() + "\"";
 
             db.update(CommentDBHandler.TBL_NAME, values, where, null);
         }
