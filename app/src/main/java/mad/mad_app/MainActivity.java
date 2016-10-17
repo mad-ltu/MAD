@@ -267,6 +267,19 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        // There was nothing selected, that means we want everything
+        if(subListLocationPassthrough.size() == 0) {
+            for(LocationGroupListItem location : groups) {
+                subListLocationPassthrough.add(location.data);
+
+                List<SpeedTest> childList = new ArrayList<>();
+                for(SpeedTestListItem test : childMap.get(location)) {
+                    childList.add(test.data);
+                }
+                subMapTestPassthrough.put(location.data, childList);
+            }
+        }
+
         Intent statsIntent = new Intent(this, StatisticsActivity.class);
         Bundle data = new Bundle();
         data.putSerializable("LOCATION_LIST", (Serializable)subListLocationPassthrough);
