@@ -1,5 +1,8 @@
 package mad.mad_app;
 
+import android.app.Dialog;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.SQLException;
@@ -8,9 +11,11 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,6 +29,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class CommentsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -38,6 +44,11 @@ public class CommentsActivity extends AppCompatActivity implements OnMapReadyCal
     private ImageButton newComment;
     private ImageButton deleteItem;
     private ImageButton editName;
+    private ImageButton bluetooth;
+
+    private BluetoothAdapter BA;
+    private Set<BluetoothDevice> pairedDevices;
+    private final int REQUEST_ENABLE_BLUETOOTH = 1;
 
     private ListView commentsList;
     private CommentListAdapter adapter;
@@ -155,6 +166,45 @@ public class CommentsActivity extends AppCompatActivity implements OnMapReadyCal
             // Don't show the edit button if they can't edit
             editName.setVisibility(View.GONE);
         }
+
+        bluetooth = (ImageButton) findViewById(R.id.btnBluetooth);
+        bluetooth.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                BA = BluetoothAdapter.getDefaultAdapter();
+                if(BA == null){
+                    //Device Doesn't support bluetooth
+                    AlertDialog.Builder builder = new AlertDialog.Builder(CommentsActivity.this);
+                    builder.setTitle("Bluetooth");
+                    builder.setMessage("Bluetooth Not Supported");
+                    builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            finish();
+                        }
+                    });
+                    AlertDialog alert = builder.create();
+                    alert.show();
+
+                }else {
+                    if (!BA.isEnabled()) {
+                        Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                        startActivityForResult(intent, 1);
+                    }
+                    pairedDevices = BA.getBondedDevices();
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(CommentsActivity.this);
+                    builder.setTitle("Bluetooth Sharing Alert")
+                            .setItems((CharSequence[]) pairedDevices.toArray(), new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+									// need to think about this
+                                }
+                            });
+                    AlertDialog alert = builder.create();
+                    alert.show();
+                }
+            }
+        });
 
 
 
