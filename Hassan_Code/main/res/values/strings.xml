@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">SpeedTest</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="down"></string>
+    <string name="up"></string>
+    <string name="test">Test Your Speed</string>
+    <string name="compare">Show Results for comparison</string>
+    <string name="speedtest">Test Speed</string>
+    <string name="title_activity_main2">Main2Activity</string>
+    <string name="str_btn_chart" />
+    <string-array name="planets_array">
+        <item>Mercury</item>
+        <item>Venus</item>
+        <item>Earth</item>
+        <item>Mars</item>
+        <item>Jupiter</item>
+        <item>Saturn</item>
+        <item>Uranus</item>
+        <item>Neptune</item>
+    </string-array>
+</resources>
