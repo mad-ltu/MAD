@@ -138,7 +138,7 @@ public class SpeedTestExpandableListAdapter extends BaseExpandableListAdapter {
         test.tvDateTime.setText(new SimpleDateFormat("EEE, MMM d yyyy \nhh:mm.ssa").format(test.data.getDateTime()));
 
         test.tvSpeed = (TextView)convertView.findViewById(R.id.speed);
-        test.tvSpeed.setText(String.format("%.2fKB/s Down\n%.2fKB/s Up", test.data.getSpeedKBpsDown(), test.data.getSpeedKBpsUp()));
+        test.tvSpeed.setText(String.format("%.2fKB/s", test.data.getSpeedKBpsDown()));
 
         final ViewGroup childParentInner = parent;
 
