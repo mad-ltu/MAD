@@ -20,8 +20,9 @@ public class SpeedTestManager {
 
     private static final String[] allColumns = {
             SpeedTestDBHandler.COL_ID, SpeedTestDBHandler.COL_PARENT_ID,
-            SpeedTestDBHandler.COL_DATETIME, SpeedTestDBHandler.COL_SPEED,
-            SpeedTestDBHandler.COL_CONN_TYPE, SpeedTestDBHandler.COL_CONN_SUBTYPE
+            SpeedTestDBHandler.COL_DATETIME, SpeedTestDBHandler.COL_SPEED_DOWN,
+            SpeedTestDBHandler.COL_SPEED_UP, SpeedTestDBHandler.COL_CONN_TYPE,
+            SpeedTestDBHandler.COL_CONN_SUBTYPE
     };
 
     private SQLiteDatabase db;
@@ -95,7 +96,8 @@ public class SpeedTestManager {
         values.put(SpeedTestDBHandler.COL_PARENT_ID, test.getParentId());
         Date testTime = test.getDateTime();
         values.put(SpeedTestDBHandler.COL_DATETIME, testTime == null ? null : testTime.getTime());
-        values.put(SpeedTestDBHandler.COL_SPEED, test.getSpeedKBps());
+        values.put(SpeedTestDBHandler.COL_SPEED_DOWN, test.getSpeedKBpsDown());
+        values.put(SpeedTestDBHandler.COL_SPEED_UP, test.getSpeedKBpsUp());
         values.put(SpeedTestDBHandler.COL_CONN_TYPE, test.getConnType());
         values.put(SpeedTestDBHandler.COL_CONN_SUBTYPE, test.getConnSubType());
 
@@ -126,9 +128,10 @@ public class SpeedTestManager {
         test.setId(cursor.getLong(0));
         test.setParentId(cursor.getLong(1));
         test.setDateTime(cursor.getLong(2));
-        test.setSpeedKBps(cursor.getDouble(3));
-        test.setConnType(cursor.getString(4));
-        test.setConnSubType(cursor.getString(5));
+        test.setSpeedKBpsDown(cursor.getDouble(3));
+        test.setSpeedKBpsUp(cursor.getDouble(4));
+        test.setConnType(cursor.getString(5));
+        test.setConnSubType(cursor.getString(6));
 
         return test;
     }

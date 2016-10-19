@@ -3,6 +3,9 @@ package mad.mad_app;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.ProgressDialog;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -46,6 +49,7 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int PERMISSIONS_REQUEST_CALLBACK_ID = 4040;
+    private static final int BLUETOOTH_ENABLE_RESULT_CALLBACK_ID = 1000;
 
     private SpeedTestExpandableListAdapter adapter;
     private ExpandableListView listView;
@@ -107,7 +111,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     protected void stopLocationUpdates() {
-        LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
+        if(googleApiClient.isConnected()) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
+        }
     }
 
     @TargetApi(23)
@@ -252,6 +258,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
     }
 
+    public void onShareClicked(View v) {
+        List<LocationGroup> subListLocationPassthrough = new ArrayList<>();
+        Map<LocationGroup, List<SpeedTest>> subMapTestPassthrough = new HashMap<>();
+        getSelectedItems(subListLocationPassthrough, subMapTestPassthrough);
+
+        Intent shareIntent = new Intent(this, ShareActivity.class);
+        Bundle data = new Bundle();
+        data.putSerializable("LOCATION_LIST", (Serializable)subListLocationPassthrough);
+        data.putSerializable("TEST_MAP", (Serializable)subMapTestPassthrough);
+        shareIntent.putExtras(data);
+
+        startActivity(shareIntent);
+    }
+
     public void onNewTestClicked(View v) {
         new SpeedTestTask().execute();
     }
@@ -321,34 +341,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public void onStatsClicked(View v) {
         List<LocationGroup> subListLocationPassthrough = new ArrayList<>();
         Map<LocationGroup, List<SpeedTest>> subMapTestPassthrough = new HashMap<>();
-
-        // go through and find all items that are checked and pass them through
-        for(LocationGroupListItem location : groups) {
-            if(location.cbSelector.isChecked()) {
-                // if the location is checked, all items under it are also checked
-                subListLocationPassthrough.add(location.data);
-
-                List<SpeedTest> childList = new ArrayList<>();
-                for(SpeedTestListItem test : childMap.get(location)) {
-                    childList.add(test.data);
-                }
-                subMapTestPassthrough.put(location.data, childList);
-            } else {
-                // A location can still have checked items if it isn't checked.
-                // Still possibly need to add it
-                List<SpeedTest> childList = new ArrayList<>();
-                for(SpeedTestListItem test : childMap.get(location)) {
-                    if(test.cbSelector.isChecked()) {
-                        childList.add(test.data);
-                    }
-                }
-
-                if(!childList.isEmpty()) {
-                    subListLocationPassthrough.add(location.data);
-                    subMapTestPassthrough.put(location.data, childList);
-                }
-            }
-        }
+        getSelectedItems(subListLocationPassthrough, subMapTestPassthrough);
 
         // There was nothing selected, that means we want everything
         if(subListLocationPassthrough.size() == 0) {
@@ -370,6 +363,41 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         statsIntent.putExtras(data);
 
         startActivity(statsIntent);
+    }
+
+    private void getSelectedItems(List<LocationGroup> groupsOutput, Map<LocationGroup, List<SpeedTest>> childMapOutput) {
+        if(groupsOutput == null || childMapOutput == null) {
+            return;
+        }
+
+        // go through and find all items that are checked and pass them through
+        for(LocationGroupListItem location : groups) {
+            if(location.cbSelector.isChecked()) {
+                // if the location is checked, all items under it are also checked
+                groupsOutput.add(location.data);
+
+                List<SpeedTest> childList = new ArrayList<>();
+                for(SpeedTestListItem test : childMap.get(location)) {
+                    childList.add(test.data);
+                }
+                childMapOutput.put(location.data, childList);
+            } else {
+                // A location can still have checked items if it isn't checked.
+                // Still possibly need to add it
+                List<SpeedTest> childList = new ArrayList<>();
+                for(SpeedTestListItem test : childMap.get(location)) {
+                    if(test.cbSelector.isChecked()) {
+                        childList.add(test.data);
+                    }
+                }
+
+                if(!childList.isEmpty()) {
+                    groupsOutput.add(location.data);
+                    childMapOutput.put(location.data, childList);
+                }
+
+            }
+        }
     }
 
     private class SpeedTestTask extends AsyncTask<Integer, Double, Long> {
@@ -503,7 +531,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
             if(timeTaken != null) {
                 // Kilobytes/second
-                current.setSpeedKBps(((double)DL_FILE_SIZE/1024)/((double)timeTaken/1000));
+                current.setSpeedKBpsDown(((double)DL_FILE_SIZE/1024)/((double)timeTaken/1000));
                 onTestCompleted(current);
             }
 
@@ -532,6 +560,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
         if(!addPermission(permissionsList, Manifest.permission.ACCESS_WIFI_STATE)) {
             permissionsNeeded.add("ACCESS WIFI STATE");
+        }
+        if(!addPermission(permissionsList, Manifest.permission.BLUETOOTH)) {
+            permissionsNeeded.add("BLUETOOTH");
+        }
+        if(!addPermission(permissionsList, Manifest.permission.BLUETOOTH_ADMIN)) {
+            permissionsNeeded.add("BLUETOOTH_ADMIN");
         }
 
         if(permissionsList.size() > 0) {

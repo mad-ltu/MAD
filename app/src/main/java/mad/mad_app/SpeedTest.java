@@ -13,24 +13,26 @@ public class SpeedTest implements Serializable {
 
     private Double lat, lon;
     private Date dateTime;
-    private Double speedKBps;
+    private Double speedKBpsDown;
+    private Double speedKBpsUp;
     private String connType;
     private String connSubType;
 
 
-    public SpeedTest(Date dateTime, Double speedKBps, String connType, String connSubType) {
+    public SpeedTest(Date dateTime, Double speedKBpsDown, Double speedKBpsUp, String connType, String connSubType) {
         this.dateTime = dateTime;
-        this.speedKBps = speedKBps;
+        this.speedKBpsDown = speedKBpsDown;
+        this.speedKBpsUp = speedKBpsUp;
         this.connType = connType;
         this.connSubType = connSubType;
     }
 
-    public SpeedTest(Long dateTime, Double speedKBps, String connType, String connSubType) {
-        this(new Date(dateTime), speedKBps, connType, connSubType);
+    public SpeedTest(Long dateTime, Double speedKBpsDown, Double speedKBpsUp, String connType, String connSubType) {
+        this(new Date(dateTime), speedKBpsDown, speedKBpsUp, connType, connSubType);
     }
 
     public SpeedTest() {
-        this(System.currentTimeMillis(), 0.0, "UNKNOWN", "UNKNOWN");
+        this(System.currentTimeMillis(), 0.0, 0.0, "UNKNOWN", "UNKNOWN");
     }
 
     public Long getId() { return id; }
@@ -49,11 +51,17 @@ public class SpeedTest implements Serializable {
         setDateTime(new Date(dateTime));
     }
 
-    public Double getSpeedKBps() {
-        return speedKBps;
+    public Double getSpeedKBpsDown() {
+        return speedKBpsDown;
     }
-    public void setSpeedKBps(Double speedKBps) {
-        this.speedKBps = speedKBps;
+    public void setSpeedKBpsDown(Double speedKBps) {
+        this.speedKBpsDown = speedKBps;
+    }
+    public Double getSpeedKBpsUp() {
+        return speedKBpsUp;
+    }
+    public void setSpeedKBpsUp(Double speedKBps) {
+        this.speedKBpsUp = speedKBps;
     }
 
     public String getConnType() {
@@ -76,7 +84,7 @@ public class SpeedTest implements Serializable {
     public String toString() {
         return String.format("%s\tSpeed: %.2fKB/s\nConnection: %s %s",
                 new SimpleDateFormat("EEE, MMM d, ''yy @ hh:mm.ssa").format(dateTime),
-                speedKBps, connType, connSubType);
+                speedKBpsDown, connType, connSubType);
     }
 
     @Override

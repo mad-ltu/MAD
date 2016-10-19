@@ -13,7 +13,8 @@
         android:layout_marginLeft="10dp"
         android:lines="2"
         android:layout_marginBottom="2dp"
-        android:layout_marginTop="2dp" />
+        android:layout_marginTop="2dp"
+        android:text="Sat, Oct 10 2016\n09:07.12am" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -21,7 +22,11 @@
         android:id="@+id/speed"
         android:layout_weight="1"
         android:focusable="false"
-        android:layout_gravity="center_vertical" />
+        android:layout_gravity="center_vertical"
+        android:lines="2"
+        android:maxLines="2"
+        android:minLines="2"
+        android:text="100.24KB/s Down\n199.23KB/s Up" />
 
     <ImageButton
         android:layout_width="wrap_content"

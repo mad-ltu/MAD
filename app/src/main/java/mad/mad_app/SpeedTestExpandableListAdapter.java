@@ -138,7 +138,7 @@ public class SpeedTestExpandableListAdapter extends BaseExpandableListAdapter {
         test.tvDateTime.setText(new SimpleDateFormat("EEE, MMM d yyyy \nhh:mm.ssa").format(test.data.getDateTime()));
 
         test.tvSpeed = (TextView)convertView.findViewById(R.id.speed);
-        test.tvSpeed.setText(String.format("%.2fKB/s", test.data.getSpeedKBps()));
+        test.tvSpeed.setText(String.format("%.2fKB/s Down\n%.2fKB/s Up", test.data.getSpeedKBpsDown(), test.data.getSpeedKBpsUp()));
 
         final ViewGroup childParentInner = parent;
 
@@ -153,7 +153,7 @@ public class SpeedTestExpandableListAdapter extends BaseExpandableListAdapter {
                 commentsIntent.putExtra("PARENT_TYPE_CODE", "SPEED_TEST");
                 commentsIntent.putExtra("INFO", new SimpleDateFormat("dd/mm/yyyy hh:mm.ssa").format(test.data.getDateTime()));
                 commentsIntent.putExtra("EXTRA_INFO_LEFT", test.data.getConnType() + " - " + test.data.getConnSubType());
-                commentsIntent.putExtra("EXTRA_INFO_RIGHT", String.format("%.2fKB/s", test.data.getSpeedKBps()));
+                commentsIntent.putExtra("EXTRA_INFO_RIGHT", String.format("%.2fKB/s", test.data.getSpeedKBpsDown()));
 
                 childParentInner.getContext().startActivity(commentsIntent);
             }
@@ -190,8 +190,8 @@ public class SpeedTestExpandableListAdapter extends BaseExpandableListAdapter {
             Collections.sort(childMap.get(lgItem), new Comparator<SpeedTestListItem>() {
                 @Override
                 public int compare(SpeedTestListItem lhs, SpeedTestListItem rhs) {
-                    if(lhs.data.getSpeedKBps() != null && rhs.data.getSpeedKBps() != null) {
-                        return rhs.data.getSpeedKBps().compareTo(lhs.data.getSpeedKBps());
+                    if(lhs.data.getSpeedKBpsDown() != null && rhs.data.getSpeedKBpsDown() != null) {
+                        return rhs.data.getSpeedKBpsDown().compareTo(lhs.data.getSpeedKBpsDown());
                     }
 
                     return  -1;
